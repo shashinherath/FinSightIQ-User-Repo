@@ -73,42 +73,118 @@ The User Service is the authoritative identity and personal state service in the
 
 ```
 FinSightIQ-User-Repo/
-├── .env.example
-├── .gitignore
 ├── .dockerignore
 ├── .editorconfig
+├── .env.example
+├── .gitignore
 ├── Dockerfile
 ├── global.json
 ├── nuget.config
+├── README.md
 ├── Database/                            # Database schema scripts
-│   ├── Table/                           # Table definitions (users, refresh_tokens, watchlists)
-│   └── Procedures/                      # Stored procedures & database functions
+│   ├── Procedures/                      # Stored procedures & database functions
+│   │   ├── V1__users_procedures.sql
+│   │   ├── V2__refresh_tokens_procedures.sql
+│   │   └── V3__watchlists_procedures.sql
+│   └── Tables/                          # Table definitions (users, refresh_tokens, watchlists)
+│       ├── V1__users.sql
+│       ├── V2__refresh_tokens.sql
+│       └── V3__watchlists.sql
 ├── packages/                            # FinSightIQ common shared libraries
 │   ├── FinSightIQ.BuildingBlocks.0.1.0.nupkg
 │   └── FinSightIQ.Contracts.0.1.0.nupkg
-├── Application/                         # Solution & projects: Core, Infrastructure, Api, Tests
-│   ├── FinSightIQ.UserService.sln
-│   ├── FinSightIQ.UserService.Core/     # Domain layer: DTOs, Interfaces, Validators, Services (DTO-only pattern)
-│   │   ├── DTOs/
-│   │   ├── Interfaces/
-│   │   ├── Services/
-│   │   └── Validators/
-│   ├── FinSightIQ.UserService.Infrastructure/ # Persistence, Repositories, RS256 Key & Token Management
-│   │   ├── Health/
-│   │   ├── Persistence/
-│   │   ├── Repositories/
-│   │   └── Security/
-│   ├── FinSightIQ.UserService.Api/      # HTTP Presentation layer, Controllers, Middleware
-│   │   ├── Controllers/
-│   │   ├── Extensions/
-│   │   ├── Middleware/
-│   │   ├── appsettings.json
-│   │   ├── appsettings.Development.json
-│   │   └── Program.cs
-│   └── FinSightIQ.UserService.Tests/    # Unit, Contract, and PostgreSQL Integration tests
-│       ├── Contract/
-│       ├── Integration/
-│       └── Unit/
+└── Application/                         # Solution & projects: Core, Infrastructure, Api, Tests
+    ├── FinSightIQ.UserService.sln
+    ├── FinSightIQ.UserService.Api/      # HTTP Presentation layer, Controllers, Middleware, Health
+    │   ├── Controllers/
+    │   │   ├── AuthController.cs
+    │   │   ├── UsersController.cs
+    │   │   └── WatchlistController.cs
+    │   ├── Extensions/
+    │   │   ├── AuthenticationExtensions.cs
+    │   │   └── ProblemDetailsExtensions.cs
+    │   ├── Health/
+    │   │   └── DatabaseHealthCheck.cs
+    │   ├── Middleware/
+    │   │   ├── CorrelationIdMiddleware.cs
+    │   │   ├── ExceptionHandlingMiddleware.cs
+    │   │   └── UserContextMiddleware.cs
+    │   ├── Properties/
+    │   │   └── launchSettings.json
+    │   ├── appsettings.Development.json
+    │   ├── appsettings.json
+    │   ├── FinSightIQ.UserService.Api.csproj
+    │   └── Program.cs
+    ├── FinSightIQ.UserService.Core/     # Domain layer: DTOs, Interfaces, Validators, Services (DTO-only pattern)
+    │   ├── DTOs/
+    │   │   ├── AuthDtos.cs
+    │   │   ├── RefreshTokenRecordDto.cs
+    │   │   ├── UserAdminDtos.cs
+    │   │   ├── UserRecordDto.cs
+    │   │   ├── UserRole.cs
+    │   │   └── WatchlistDtos.cs
+    │   ├── Interfaces/
+    │   │   ├── IDapperWrapper.cs
+    │   │   ├── IPasswordHasher.cs
+    │   │   ├── IRefreshTokenRepository.cs
+    │   │   ├── ITokenService.cs
+    │   │   ├── IUserRepository.cs
+    │   │   ├── IUserService.cs
+    │   │   ├── IWatchlistRepository.cs
+    │   │   └── IWatchlistService.cs
+    │   ├── Services/
+    │   │   ├── UserService.cs
+    │   │   └── WatchlistService.cs
+    │   ├── Validators/
+    │   │   ├── ChangePasswordRequestValidator.cs
+    │   │   ├── LoginRequestValidator.cs
+    │   │   ├── RegisterRequestValidator.cs
+    │   │   └── WatchlistAddRequestValidator.cs
+    │   └── FinSightIQ.UserService.Core.csproj
+    ├── FinSightIQ.UserService.Infrastructure/ # Persistence, Repositories, RS256 Key & Token Management
+    │   ├── Persistence/
+    │   │   ├── DapperSqlTypeHandlers.cs
+    │   │   └── DapperWrapper.cs
+    │   ├── Repositories/
+    │   │   ├── RefreshTokenRepository.cs
+    │   │   ├── UserRepository.cs
+    │   │   └── WatchlistRepository.cs
+    │   ├── Security/
+    │   │   ├── BCryptPasswordHasher.cs
+    │   │   ├── JwtOptions.cs
+    │   │   ├── JwtTokenService.cs
+    │   │   └── RsaKeyProvider.cs
+    │   └── FinSightIQ.UserService.Infrastructure.csproj
+    └── FinSightIQ.UserService.Tests/    # Unit, Contract, and PostgreSQL Integration tests
+        ├── Contract/
+        │   └── ProblemDetailsContractTests.cs
+        ├── Integration/
+        │   ├── DatabaseCollection.cs
+        │   ├── DatabaseFixture.cs
+        │   ├── RefreshTokenRepositoryTests.cs
+        │   ├── UserRepositoryTests.cs
+        │   └── WatchlistRepositoryTests.cs
+        ├── Unit/
+        │   ├── Api/
+        │   │   ├── Controllers/
+        │   │   │   ├── AuthControllerTests.cs
+        │   │   │   ├── UsersControllerTests.cs
+        │   │   │   └── WatchlistControllerTests.cs
+        │   │   └── Middleware/
+        │   │       ├── CorrelationIdMiddlewareTests.cs
+        │   │       ├── ExceptionHandlingMiddlewareTests.cs
+        │   │       └── UserContextMiddlewareTests.cs
+        │   ├── Core/
+        │   │   ├── Services/
+        │   │   │   ├── UserServiceTests.cs
+        │   │   │   └── WatchlistServiceTests.cs
+        │   │   └── Validators/
+        │   │       └── ValidatorTests.cs
+        │   └── Infrastructure/
+        │       └── Security/
+        │           ├── PasswordHasherTests.cs
+        │           └── TokenServiceTests.cs
+        └── FinSightIQ.UserService.Tests.csproj
 ```
 
 ---
@@ -234,11 +310,11 @@ Copy `.env.example` to `.env` or provide environment variables:
 - Flyway CLI (or run Flyway via Docker)
 
 ### 7.2 Database Initialization
-The database schema DDL is located in `Database/Table`. To initialize the tables in PostgreSQL:
+The database schema DDL and stored procedures are located in `Database/Tables` and `Database/Procedures`. To initialize the database in PostgreSQL:
 
 ```powershell
-# Using psql or containerized PostgreSQL to execute table definitions
-Get-ChildItem -Path "Database/Table/*.sql" | ForEach-Object {
+# Using psql or containerized PostgreSQL to execute table definitions and procedures
+Get-ChildItem -Path "Database/Tables/*.sql", "Database/Procedures/*.sql" | ForEach-Object {
     Get-Content $_.FullName | docker exec -i finsightiq-postgres psql -U postgres -d usersdb
 }
 ```
